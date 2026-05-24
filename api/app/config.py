@@ -46,6 +46,9 @@ class Settings:
     generation_timeout_s: int = 30
     generation_size: int = 1024
 
+    # Database
+    database_url: str | None = None
+
     # CORS
     allowed_origins: list[str] = field(default_factory=lambda: ["http://localhost:3000"])
 
@@ -105,6 +108,7 @@ def load_settings() -> Settings:
         stability_api_key=_clean_key("STABILITY_API_KEY"),
         generation_timeout_s=_env_int("GENERATION_TIMEOUT_S", 30),
         generation_size=_env_int("GENERATION_SIZE", 1024),
+        database_url=_clean_key("DATABASE_URL"),
         allowed_origins=origin_list or ["http://localhost:3000"],
     )
 

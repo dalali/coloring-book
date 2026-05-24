@@ -47,6 +47,7 @@ class HealthResponse(BaseModel):
     status: str = "ok"
     version: str = "0.1.0"
     text_flow_enabled: bool = False
+    library_enabled: bool = False
 
 
 class ErrorBody(BaseModel):
@@ -56,3 +57,43 @@ class ErrorBody(BaseModel):
 
 class ErrorResponse(BaseModel):
     error: ErrorBody
+
+
+# ── library ───────────────────────────────────────────────────────────────────
+
+class LibraryPage(BaseModel):
+    """A single entry in the coloring-page library (thumbnail variant)."""
+
+    id: int
+    prompt: str | None
+    category: str
+    thumbnail: str | None = Field(None, description="JPEG thumbnail as data: URL.")
+    source_type: str
+    width: int | None
+    height: int | None
+    region_count: int | None
+    created_at: str | None
+
+
+class LibraryPageFull(BaseModel):
+    """Full page returned by GET /api/library/{id}."""
+
+    id: int
+    prompt: str | None
+    category: str
+    page_image: str | None = Field(None, description="Full PNG as data: URL.")
+    source_type: str
+    width: int | None
+    height: int | None
+    region_count: int | None
+    created_at: str | None
+
+
+class CategoryCount(BaseModel):
+    category: str
+    count: int
+
+
+class LibraryListResponse(BaseModel):
+    pages: list[LibraryPage]
+    total_shown: int

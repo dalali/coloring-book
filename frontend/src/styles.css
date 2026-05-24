@@ -68,19 +68,20 @@ body {
 
 .tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid var(--ink-300);
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--ink-300);
 }
 
 .tab {
   background: none;
   border: none;
-  padding: 8px 12px;
+  padding: 10px 16px;
   font-size: 15px;
   cursor: pointer;
   color: var(--ink-600);
   border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
 }
 
 .tab.active {
@@ -306,5 +307,218 @@ body {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* ── browse card ─────────────────────────────────────────────────────────── */
+.browse-card {
+  min-height: 400px;
+}
+
+/* ── inspire hint ─────────────────────────────────────────────────────────── */
+.inspire-hint {
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ── category pills ──────────────────────────────────────────────────────── */
+.category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.pill {
+  background: var(--surface);
+  border: 1px solid var(--ink-300);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--ink-600);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.pill:hover {
+  border-color: var(--brand-500);
+  color: var(--ink-900);
+}
+
+.pill.active {
+  background: var(--brand-100);
+  border-color: var(--brand-700);
+  color: var(--brand-700);
+  font-weight: 600;
+}
+
+.pill-count {
+  background: var(--ink-300);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 11px;
+  color: var(--ink-900);
+}
+
+.pill.active .pill-count {
+  background: var(--brand-700);
+  color: #fff;
+}
+
+/* ── gallery ─────────────────────────────────────────────────────────────── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.gallery-card {
+  background: var(--surface);
+  border: 1px solid var(--ink-300);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.gallery-card:hover {
+  box-shadow: 0 4px 16px rgba(28, 25, 23, 0.14);
+  transform: translateY(-2px);
+}
+
+.gallery-thumb {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  display: block;
+  background: var(--ink-300);
+}
+
+.gallery-thumb-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.gallery-card-meta {
+  padding: 8px 10px;
+}
+
+.gallery-caption {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--ink-600);
+  line-height: 1.4;
+}
+
+.badge {
+  display: inline-block;
+  background: var(--brand-100);
+  color: var(--brand-700);
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.gallery-loading,
+.gallery-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 12px;
+  color: var(--ink-600);
+  text-align: center;
+}
+
+.browse-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 12px;
+  color: var(--ink-600);
+  text-align: center;
+}
+
+/* ── full-page modal ─────────────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 25, 23, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px;
+}
+
+.modal-box {
+  background: var(--surface-card);
+  border-radius: 16px;
+  max-width: 680px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 20px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--ink-600);
+  line-height: 1;
+}
+
+.modal-image {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--ink-300);
+}
+
+.modal-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+}
+
+.modal-meta {
+  margin-top: 16px;
+}
+
+.modal-prompt {
+  font-style: italic;
+  color: var(--ink-600);
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── responsive tweaks ───────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 }

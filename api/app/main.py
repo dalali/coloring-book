@@ -1,11 +1,28 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from . import db
 from .config import settings
 from .routers import coloring
 
-app = FastAPI(title="coloring-book API", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: connect to DB if configured
+    if settings.database_url:
+        try:
+            db.init(settings.database_url)
+        except Exception as exc:
+            # Non-fatal: app works without DB, library features are just disabled
+            print(f"[coloring-book] DB init failed (library disabled): {exc}")
+    yield
+    # Shutdown: nothing to clean up (psycopg2 pool GC'd naturally)
+
+
+app = FastAPI(title="coloring-book API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,11 +36,7 @@ app.include_router(coloring.router)
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
-    """Render HTTPExceptions in the standard error envelope (architecture §4.4).
-
-    If ``detail`` is already a {code, message} dict we pass it through; otherwise
-    we wrap the plain detail string under a generic code.
-    """
+    """Render HTTPExceptions in the standard error envelope (architecture §4.4)."""
     detail = exc.detail
     if isinstance(detail, dict) and "code" in detail and "message" in detail:
         body = {"error": detail}

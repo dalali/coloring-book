@@ -9,8 +9,9 @@ coloring-book — Generates coloring pages from an uploaded image or text prompt
 - **Infra:** Docker Compose
 
 ## Key Flows
-1. **Image upload** → edge detection → simplification → region segmentation → number assignment → SVG/PNG output
-2. **Text prompt** → AI image generation (e.g. DALL-E / Stable Diffusion) → same pipeline as above
+1. **Inspire (upload)** → GPT-4o Vision describes → DALL-E 3 regenerates as coloring-book art → pipeline → save to library
+2. **Describe (text)** → DALL-E 3 generates → pipeline → save to library
+3. **Browse** → paginated gallery from PostgreSQL, filterable by auto-detected category
 
 ## Local Setup
 ```bash
@@ -31,3 +32,4 @@ cp .env.example .env   # fill in OPENAI_API_KEY or equivalent
 - Run tests before committing
 - Image processing logic lives in `api/app/processing/`
 - AI generation logic lives in `api/app/generation/`
+- DB logic lives in `api/app/db.py`; category detection in `api/app/categorizer.py`

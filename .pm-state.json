@@ -1,0 +1,40 @@
+{
+  "project": "coloring-book",
+  "request": "Build an MVP for coloring-book: an app that generates coloring pages from an uploaded image or text prompt. Converts to a B&W numbered silhouette for color-by-number. Supports both image upload (inspiration) and text-to-image generation (from scratch). Backend: Python FastAPI. Frontend: React. Infra: Docker Compose.",
+  "phase": "done",
+  "iteration": 1,
+  "trello": {
+    "boardId": "6a12a8934b01719cb9657686",
+    "boardUrl": "https://trello.com/b/QklHQdLw",
+    "lists": {
+      "backlog": "6a12a8a24eab590402316a5b",
+      "prioritized": "6a12a8a3e425fe34251bb6ef",
+      "wip": "6a12a8a4e7ea3fb194d115ad",
+      "review": "6a12a8a4250864fe96259e06",
+      "test": "6a12a8a5b511f5ea36169472",
+      "done": "6a12a8a5622944777ef08d5e"
+    },
+    "cards": {
+      "epic": "6a12b0621305bfd2951bdbe0",
+      "prd": "6a12b0630f82cead6cf8ef89",
+      "design": "6a12b063cca1644a94b0bdae",
+      "architecture": "6a12b0649af85add75bdbc26",
+      "code-review": "6a12b064f6859b31d04e8b31",
+      "qa": "6a12b06529b30c3174d3012b",
+      "security": "6a12b0653f5351cc01880840",
+      "coding-1-task-1": "6a12b74519e985abb3c53c1c",
+      "coding-1-task-2": "6a12b7454e6de12742f4f8bf",
+      "coding-1-task-3": "6a12b746a63f14c48537f2de",
+      "coding-1-task-4": "6a12b746c156cc02eaee6d9a",
+      "coding-1-task-5": "6a12b747afa10285b69b1eae"
+    }
+  },
+  "branch": "feature/mvp-iteration-1",
+  "artifacts": {
+    "prd": "docs/PRD.md",
+    "design": "docs/design.md",
+    "architecture": "docs/architecture.md"
+  },
+  "issues": [],
+  "status": "done"
+}

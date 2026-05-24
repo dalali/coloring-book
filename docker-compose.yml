@@ -1,4 +1,18 @@
 services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: coloring
+      POSTGRES_USER: coloring
+      POSTGRES_PASSWORD: coloring
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coloring"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   api:
     build: ./api
     ports:
@@ -6,6 +20,11 @@ services:
     volumes:
       - ./api:/app
     env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://coloring:coloring@db:5432/coloring
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   frontend:
@@ -19,3 +38,6 @@ services:
     environment:
       - VITE_API_URL=http://localhost:8000
     restart: unless-stopped
+
+volumes:
+  db_data:

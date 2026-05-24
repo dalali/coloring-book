@@ -20,11 +20,13 @@ export async function getHealth() {
   return resp.json();
 }
 
-export async function fromImage({ file, complexity }) {
+// ── creation ─────────────────────────────────────────────────────────────────
+
+export async function fromInspire({ file, complexity }) {
   const form = new FormData();
   form.append("file", file);
   form.append("complexity", complexity);
-  const resp = await fetch(`${API_URL}/api/coloring/from-image`, {
+  const resp = await fetch(`${API_URL}/api/coloring/from-inspire`, {
     method: "POST",
     body: form,
   });
@@ -38,6 +40,28 @@ export async function fromText({ prompt, complexity }) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ prompt, complexity }),
   });
+  if (!resp.ok) throw new Error(await parseError(resp));
+  return resp.json();
+}
+
+// ── library ───────────────────────────────────────────────────────────────────
+
+export async function getLibrary({ category = null, limit = 24, offset = 0 } = {}) {
+  const params = new URLSearchParams({ limit, offset });
+  if (category && category !== "All") params.set("category", category);
+  const resp = await fetch(`${API_URL}/api/library?${params}`);
+  if (!resp.ok) throw new Error(await parseError(resp));
+  return resp.json(); // { pages: [...], total_shown: N }
+}
+
+export async function getLibraryCategories() {
+  const resp = await fetch(`${API_URL}/api/library/categories`);
+  if (!resp.ok) throw new Error(await parseError(resp));
+  return resp.json(); // [{ category, count }, ...]
+}
+
+export async function getLibraryPage(id) {
+  const resp = await fetch(`${API_URL}/api/library/${id}`);
   if (!resp.ok) throw new Error(await parseError(resp));
   return resp.json();
 }
