@@ -63,6 +63,13 @@ def process_image(raw: bytes, complexity: str, output_format: str | None) -> Col
     return _to_response(result)
 
 
+_COLORING_STYLE = (
+    "Coloring book illustration: thick black outlines, flat areas of solid color, "
+    "no gradients or shading, no photorealism, white background, clean simple cartoon "
+    "style suitable for children to color in. Subject: "
+)
+
+
 def process_text(prompt: str, complexity: str, output_format: str | None) -> ColoringResponse:
     """Generate an image from a prompt, then run the pipeline (FR2)."""
     prompt = (prompt or "").strip()
@@ -74,8 +81,12 @@ def process_text(prompt: str, complexity: str, output_format: str | None) -> Col
     if provider is None:
         raise errors.text_flow_disabled()
 
+    # Wrap the user's prompt with coloring-book style guidance so the
+    # generator produces flat, outline-heavy art that the pipeline handles well.
+    generation_prompt = _COLORING_STYLE + prompt
+
     try:
-        raw = provider.generate(prompt, size=settings.generation_size)
+        raw = provider.generate(generation_prompt, size=settings.generation_size)
     except ContentPolicyError as exc:
         raise errors.content_policy(str(exc)) from exc
     except GenerationUnavailable as exc:

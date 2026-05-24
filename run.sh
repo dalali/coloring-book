@@ -6,7 +6,8 @@ CMD=${1:-help}
 # Auto-create .env from .env.example if missing
 if [ ! -f .env ] && [ -f .env.example ]; then
   cp .env.example .env
-  echo "ℹ  Created .env from .env.example — add your OPENAI_API_KEY to enable text-to-image."
+  echo "ℹ  Created .env from .env.example"
+  echo "   → Add OPENAI_API_KEY=sk-... to .env to unlock the ✨ Describe tab."
 fi
 
 case "$CMD" in
