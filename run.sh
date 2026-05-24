@@ -3,6 +3,12 @@ set -euo pipefail
 
 CMD=${1:-help}
 
+# Auto-create .env from .env.example if missing
+if [ ! -f .env ] && [ -f .env.example ]; then
+  cp .env.example .env
+  echo "ℹ  Created .env from .env.example — add your OPENAI_API_KEY to enable text-to-image."
+fi
+
 case "$CMD" in
   start|up)
     echo "▶ Starting coloring-book..."
