@@ -1,12 +1,11 @@
-"""Default AI provider: OpenAI DALL-E 3 (architecture §6.2).
+"""Default AI provider: OpenAI gpt-image-1 (architecture §6.2).
 
 Keys are read server-side only and never logged or returned (NFR3 / R5).
 """
 from __future__ import annotations
 
+import base64
 import logging
-
-import httpx
 
 from ..config import Settings
 from .base import ContentPolicyError, GenerationUnavailable
@@ -14,10 +13,10 @@ from .base import ContentPolicyError, GenerationUnavailable
 logger = logging.getLogger(__name__)
 
 
-def _nearest_dalle_size(size: int) -> str:
-    """DALL-E 3 supports a fixed set of sizes; pick the closest square-ish one."""
+def _nearest_size(size: int) -> str:
+    """gpt-image-1 supports 1024x1024, 1536x1024, 1024x1536."""
     if size >= 1536:
-        return "1792x1024"
+        return "1536x1024"
     return "1024x1024"
 
 
@@ -30,7 +29,6 @@ class OpenAIProvider:
         self._timeout = settings.generation_timeout_s
 
     def generate(self, prompt: str, size: int = 1024) -> bytes:
-        # Imported lazily so the module loads even if the SDK is absent.
         from openai import OpenAI
 
         try:
@@ -40,11 +38,10 @@ class OpenAIProvider:
 
         client = OpenAI(api_key=self._api_key, timeout=self._timeout)
         try:
-            # Use URL response (default) — response_format was removed from the API.
             resp = client.images.generate(
-                model="dall-e-3",
+                model="gpt-image-1",
                 prompt=prompt,
-                size=_nearest_dalle_size(size),
+                size=_nearest_size(size),
                 n=1,
             )
         except RateLimitError as exc:  # type: ignore[misc]
@@ -66,11 +63,9 @@ class OpenAIProvider:
             logger.error("OpenAI unexpected error: %s", exc)
             raise GenerationUnavailable(f"Image generator unavailable: {type(exc).__name__}") from exc
 
-        # Download the image from the returned URL.
         try:
-            url = resp.data[0].url
-            raw = httpx.get(url, timeout=30).content
-            return raw
+            b64 = resp.data[0].b64_json
+            return base64.b64decode(b64)
         except Exception as exc:
-            logger.error("Failed to download generated image: %s", exc)
-            raise GenerationUnavailable("Could not download the generated image.") from exc
+            logger.error("Failed to decode generated image: %s", exc)
+            raise GenerationUnavailable("The image generator returned no image.") from exc
