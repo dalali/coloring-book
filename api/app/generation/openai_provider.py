@@ -4,10 +4,14 @@ Keys are read server-side only and never logged or returned (NFR3 / R5).
 """
 from __future__ import annotations
 
-import base64
+import logging
+
+import httpx
 
 from ..config import Settings
 from .base import ContentPolicyError, GenerationUnavailable
+
+logger = logging.getLogger(__name__)
 
 
 def _nearest_dalle_size(size: int) -> str:
@@ -31,42 +35,42 @@ class OpenAIProvider:
 
         try:
             from openai import APIError, APITimeoutError, RateLimitError
-        except Exception:  # pragma: no cover - SDK shape guard
+        except Exception:  # pragma: no cover
             APIError = APITimeoutError = RateLimitError = Exception  # type: ignore
 
         client = OpenAI(api_key=self._api_key, timeout=self._timeout)
         try:
+            # Use URL response (default) — response_format was removed from the API.
             resp = client.images.generate(
                 model="dall-e-3",
                 prompt=prompt,
                 size=_nearest_dalle_size(size),
                 n=1,
-                response_format="b64_json",
             )
         except RateLimitError as exc:  # type: ignore[misc]
             raise GenerationUnavailable("Rate limited by the image generator.") from exc
         except APITimeoutError as exc:  # type: ignore[misc]
             raise GenerationUnavailable("The image generator timed out.") from exc
         except APIError as exc:  # type: ignore[misc]
-            # Content-policy rejections surface as a 400 from the API.
             status = getattr(exc, "status_code", None)
             message = str(getattr(exc, "message", "") or exc).lower()
-            import logging
-            logging.getLogger(__name__).error("OpenAI APIError status=%s: %s", status, exc)
-            if status == 400 and ("content_policy" in message or "safety" in message or "policy" in message):
+            logger.error("OpenAI APIError status=%s: %s", status, exc)
+            if status == 400 and any(w in message for w in ("content_policy", "safety", "policy")):
                 raise ContentPolicyError("That prompt was rejected by the image generator.") from exc
             if status == 401:
                 raise GenerationUnavailable("OpenAI API key is invalid or expired.") from exc
             if status == 429:
-                raise GenerationUnavailable("OpenAI quota exceeded — check your usage at platform.openai.com.") from exc
+                raise GenerationUnavailable("OpenAI quota exceeded — check usage at platform.openai.com.") from exc
             raise GenerationUnavailable(f"OpenAI error ({status}): {str(exc)[:200]}") from exc
-        except Exception as exc:  # network / unexpected
-            import logging
-            logging.getLogger(__name__).error("OpenAI unexpected error: %s", exc)
+        except Exception as exc:
+            logger.error("OpenAI unexpected error: %s", exc)
             raise GenerationUnavailable(f"Image generator unavailable: {type(exc).__name__}") from exc
 
+        # Download the image from the returned URL.
         try:
-            b64 = resp.data[0].b64_json
-            return base64.b64decode(b64)
-        except Exception as exc:  # pragma: no cover - response shape guard
-            raise GenerationUnavailable("The image generator returned no image.") from exc
+            url = resp.data[0].url
+            raw = httpx.get(url, timeout=30).content
+            return raw
+        except Exception as exc:
+            logger.error("Failed to download generated image: %s", exc)
+            raise GenerationUnavailable("Could not download the generated image.") from exc
