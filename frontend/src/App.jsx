@@ -60,7 +60,17 @@ function reducer(state, action) {
     case "ERROR":
       return { ...state, status: "error", error: action.error };
     case "RESET":
-      return { ...initialState, textFlowEnabled: state.textFlowEnabled, libraryEnabled: state.libraryEnabled };
+      return {
+        ...initialState,
+        textFlowEnabled: state.textFlowEnabled,
+        libraryEnabled: state.libraryEnabled,
+        // keep mode + input so user can edit and retry
+        mode: state.mode,
+        prompt: state.prompt,
+        file: state.file,
+        filePreview: state.filePreview,
+        complexity: state.complexity,
+      };
     default:
       return state;
   }
@@ -217,10 +227,11 @@ function ResultPanel({ status, result, error, onReset }) {
   }
   if (status === "error") {
     return (
-      <div className="result-panel">
-        <div className="banner danger">{error}</div>
+      <div className="result-panel placeholder">
+        <span className="placeholder-icon">⚠️</span>
+        <p style={{ color: "var(--danger)", textAlign: "center", padding: "0 16px" }}>{error}</p>
         <button className="btn-secondary" onClick={onReset}>
-          ↺ Start over
+          ↺ Try again
         </button>
       </div>
     );

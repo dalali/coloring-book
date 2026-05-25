@@ -52,8 +52,16 @@ class OpenAIProvider:
             status = getattr(exc, "status_code", None)
             message = str(getattr(exc, "message", "") or exc).lower()
             logger.error("OpenAI APIError status=%s: %s", status, exc)
-            if status == 400 and any(w in message for w in ("content_policy", "safety", "policy")):
-                raise ContentPolicyError("That prompt was rejected by the image generator.") from exc
+            _policy_words = (
+                "content_policy", "safety", "policy", "rejected",
+                "violates", "guidelines", "billing_limit",
+            )
+            if status == 400 and any(w in message for w in _policy_words):
+                raise ContentPolicyError(
+                    "That description was flagged by OpenAI's safety filter. "
+                    "Try rephrasing — avoid specific character names (e.g. Batman, Disney), "
+                    "brands, or anything that could be read as violent or adult."
+                ) from exc
             if status == 401:
                 raise GenerationUnavailable("OpenAI API key is invalid or expired.") from exc
             if status == 429:
