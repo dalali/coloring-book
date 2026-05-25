@@ -43,7 +43,7 @@ class Settings:
     # AI generation
     openai_api_key: str | None = None
     stability_api_key: str | None = None
-    generation_timeout_s: int = 30
+    generation_timeout_s: int = 90
     generation_size: int = 1024
 
     # Database

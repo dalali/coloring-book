@@ -51,11 +51,19 @@ class OpenAIProvider:
             # Content-policy rejections surface as a 400 from the API.
             status = getattr(exc, "status_code", None)
             message = str(getattr(exc, "message", "") or exc).lower()
+            import logging
+            logging.getLogger(__name__).error("OpenAI APIError status=%s: %s", status, exc)
             if status == 400 and ("content_policy" in message or "safety" in message or "policy" in message):
                 raise ContentPolicyError("That prompt was rejected by the image generator.") from exc
-            raise GenerationUnavailable("The image generator returned an error.") from exc
+            if status == 401:
+                raise GenerationUnavailable("OpenAI API key is invalid or expired.") from exc
+            if status == 429:
+                raise GenerationUnavailable("OpenAI quota exceeded — check your usage at platform.openai.com.") from exc
+            raise GenerationUnavailable(f"OpenAI error ({status}): {str(exc)[:200]}") from exc
         except Exception as exc:  # network / unexpected
-            raise GenerationUnavailable("The image generator is unavailable.") from exc
+            import logging
+            logging.getLogger(__name__).error("OpenAI unexpected error: %s", exc)
+            raise GenerationUnavailable(f"Image generator unavailable: {type(exc).__name__}") from exc
 
         try:
             b64 = resp.data[0].b64_json
