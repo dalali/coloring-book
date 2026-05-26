@@ -42,6 +42,7 @@ class OpenAIProvider:
                 model="gpt-image-1",
                 prompt=prompt,
                 size=_nearest_size(size),
+                quality="low",  # faster; pipeline redraws the image anyway
                 n=1,
             )
         except RateLimitError as exc:  # type: ignore[misc]
